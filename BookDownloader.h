@@ -8,11 +8,11 @@
 
 class QNetworkReply;
 
-class DownloaderManager : public QObject
+class BookDownloader : public QObject
 {
 	Q_OBJECT
 public:
-	explicit DownloaderManager(QObject *parent = nullptr);
+	explicit BookDownloader(QObject *parent = nullptr);
 
 	QString serverUrl() const;
 	void setServerUrl(const QString &serverUrl);

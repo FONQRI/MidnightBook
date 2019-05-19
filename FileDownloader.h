@@ -14,7 +14,7 @@ class FileDownloader : public QObject
 public:
 	explicit FileDownloader(QObject *parent = nullptr);
 	virtual ~FileDownloader();
-	void downloadFile(QString path, QString url);
+	void downloadFile(QString path, QUrl url);
 
 private:
 	QNetworkAccessManager *manager;
@@ -22,10 +22,14 @@ private:
 	QFile *file;
 
 private slots:
-	void onDownloadProgress(qint64, qint64);
 	void onFinished(QNetworkReply *);
 	void onReadyRead();
 	void onReplyFinished();
+
+signals:
+	void started(QString fileName);
+	void onDownloadProgress(qint64, qint64);
+	void finished(QString fileName);
 };
 
 #endif // QDOWNLOADER_H

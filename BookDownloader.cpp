@@ -1,4 +1,4 @@
-#include "DownloaderManager.h"
+#include "BookDownloader.h"
 
 #include <iostream>
 
@@ -13,11 +13,11 @@
 
 #include "LibraryInfo.h"
 
-DownloaderManager::DownloaderManager(QObject *parent)
+BookDownloader::BookDownloader(QObject *parent)
 	: QObject(parent)
 {}
 
-void DownloaderManager::fetchBooks()
+void BookDownloader::fetchBooks()
 {
 
 	timerBooks.start(30000);
@@ -52,10 +52,10 @@ void DownloaderManager::fetchBooks()
 	});
 
 	QObject::connect(manager, &QNetworkAccessManager::finished, this,
-					 &DownloaderManager::requestBooksFinished);
+					 &BookDownloader::requestBooksFinished);
 }
 
-void DownloaderManager::fetchBook(QString id)
+void BookDownloader::fetchBook(QString id)
 {
 
 	timerBook.start(30000);
@@ -91,10 +91,10 @@ void DownloaderManager::fetchBook(QString id)
 	});
 
 	QObject::connect(manager, &QNetworkAccessManager::finished, this,
-					 &DownloaderManager::requestBookFinished);
+					 &BookDownloader::requestBookFinished);
 }
 
-void DownloaderManager::downloadSeasons(QString BookId, std::vector<int> seasonIds)
+void BookDownloader::downloadSeasons(QString BookId, std::vector<int> seasonIds)
 {
 
 	timerSeasons.start(30000);
@@ -172,10 +172,10 @@ void DownloaderManager::downloadSeasons(QString BookId, std::vector<int> seasonI
 	});
 
 	QObject::connect(manager, &QNetworkAccessManager::finished, this,
-					 &DownloaderManager::requestSeasonsFinished);
+					 &BookDownloader::requestSeasonsFinished);
 }
 
-void DownloaderManager::requestBookFinished(QNetworkReply *reply)
+void BookDownloader::requestBookFinished(QNetworkReply *reply)
 {
 	if (reply->error() != QNetworkReply::NoError) {
 		qDebug() << "Error:" << reply->errorString();
@@ -187,7 +187,7 @@ void DownloaderManager::requestBookFinished(QNetworkReply *reply)
 	qDebug() << testBook.name;
 }
 
-void DownloaderManager::requestSeasonsFinished(QNetworkReply *reply)
+void BookDownloader::requestSeasonsFinished(QNetworkReply *reply)
 {
 
 	if (reply->error() != QNetworkReply::NoError) {
@@ -198,26 +198,26 @@ void DownloaderManager::requestSeasonsFinished(QNetworkReply *reply)
 	testBook.setSeasonObject(QJsonDocument::fromJson(buf).object()["Response"].toObject());
 }
 
-QString DownloaderManager::authorId() const
+QString BookDownloader::authorId() const
 {
 	return m_authorId;
 }
 
-void DownloaderManager::setAuthorId(const QString &authorId)
+void BookDownloader::setAuthorId(const QString &authorId)
 {
 	m_authorId = authorId;
 }
 
-QString DownloaderManager::serverUrl() const
+QString BookDownloader::serverUrl() const
 {
 	return m_serverUrl;
 }
 
-void DownloaderManager::setServerUrl(const QString &serverUrl)
+void BookDownloader::setServerUrl(const QString &serverUrl)
 {
 	m_serverUrl = serverUrl;
 }
-void DownloaderManager::requestBooksFinished(QNetworkReply *reply)
+void BookDownloader::requestBooksFinished(QNetworkReply *reply)
 {
 	if (reply->error() != QNetworkReply::NoError) {
 		qDebug() << "Error:" << reply->errorString();

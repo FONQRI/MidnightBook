@@ -13,35 +13,35 @@ FileDownloader::~FileDownloader()
 	manager->deleteLater();
 }
 
-void FileDownloader::downloadFile(QString path, QString url)
+void FileDownloader::downloadFile(QString path, QUrl url)
 {
-	QString filePath = url;
 	QString saveFilePath;
-	QStringList filePathList = filePath.split('/');
-	QString fileName = filePathList.at(filePathList.count() - 1);
+	QFileInfo fileInfo(url.path());
+
 	QDir dir;
 	dir.mkpath(path);
-	saveFilePath = QString(path + "/" + fileName);
+	saveFilePath = QString(path + "/" + fileInfo.fileName());
 
 	QNetworkRequest request;
 	request.setUrl(QUrl(url));
+
 	reply = manager->get(request);
+	emit started(fileInfo.fileName());
 
 	file = new QFile;
 	file->setFileName(saveFilePath);
 	file->open(QIODevice::WriteOnly);
-
-	connect(reply, SIGNAL(downloadProgress(qint64, qint64)), this,
-			SLOT(onDownloadProgress(qint64, qint64)));
-	connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(onFinished(QNetworkReply *)));
-	connect(reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-	connect(reply, SIGNAL(finished()), this, SLOT(onReplyFinished()));
+	connect(reply, &QNetworkReply::downloadProgress, this, &FileDownloader::onDownloadProgress);
+	connect(manager, &QNetworkAccessManager::finished, this, &FileDownloader::onFinished);
+	connect(reply, &QNetworkReply::readyRead, this, &FileDownloader::onReadyRead);
+	connect(reply, &QNetworkReply::finished, this, &FileDownloader::onReplyFinished);
 }
 
-void FileDownloader::onDownloadProgress(qint64 bytesRead, qint64 bytesTotal)
-{
-	qDebug(QString::number(bytesRead).toLatin1() + " - " + QString::number(bytesTotal).toLatin1());
-}
+//void FileDownloader::onDownloadProgress(qint64 bytesRead, qint64 bytesTotal)
+//{
+//	qDebug() << QString::number(bytesRead).toLatin1() + " - "
+//					+ QString::number(bytesTotal).toLatin1();
+//}
 
 void FileDownloader::onFinished(QNetworkReply *reply)
 {
@@ -50,7 +50,7 @@ void FileDownloader::onFinished(QNetworkReply *reply)
 		qDebug("file is downloaded successfully.");
 	} break;
 	default: {
-		qDebug(reply->errorString().toLatin1());
+		qDebug() << reply->errorString().toLatin1();
 	};
 	}
 
@@ -71,4 +71,6 @@ void FileDownloader::onReplyFinished()
 		file->close();
 		file->deleteLater();
 	}
+	QFileInfo fileInfo(file->fileName());
+	emit finished(fileInfo.fileName());
 }
