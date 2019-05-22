@@ -20,11 +20,15 @@ public:
 	QString authorId() const;
 	void setAuthorId(const QString &authorId);
 
+public:
+	Book testBook;
 signals:
+	void seasonsDownloadFinished(Book testBook);
+	void booksFetchFinished(std::vector<Book> bookList);
 
 public slots:
 
-	void fetchBooks();
+	void fetchBooks(QString authorId);
 	void fetchBook(QString id);
 	void downloadSeasons(QString BookId, std::vector<int> seasonIds);
 
@@ -37,11 +41,9 @@ private:
 	QNetworkReply *seasonsReply;
 
 private:
-	void requestBooksFinished(QNetworkReply *reply);
+	void requestBooksFinished(QNetworkReply *reply, QString authorId);
 	void requestBookFinished(QNetworkReply *reply);
 	void requestSeasonsFinished(QNetworkReply *reply);
-
-	Book testBook;
 
 	QString m_serverUrl;
 

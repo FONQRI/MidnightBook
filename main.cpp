@@ -4,9 +4,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "BookDownloader.h"
-#include "FileDownloader.h"
 #include "FileManager.h"
+#include "LibraryManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,11 +13,8 @@ int main(int argc, char *argv[])
 
 	QGuiApplication app(argc, argv);
 
-	BookDownloader booksDownloader;
-	booksDownloader.setServerUrl("http://localhost:8000");
-	booksDownloader.fetchBooks();
-	booksDownloader.fetchBook("book1.FONQRI.timestamp");
-	booksDownloader.downloadSeasons("book1.FONQRI.timestamp", {1, 2});
+	FileManager fm;
+	LibraryManager bookManager(fm);
 
 	QQmlApplicationEngine engine;
 
@@ -31,8 +27,6 @@ int main(int argc, char *argv[])
 					 Qt::QueuedConnection);
 
 	engine.load(url);
-
-	FileManager::createAuthorFolders(booksDownloader.authorId());
 
 	//	FileDownloader fd;
 	//	QObject::connect(&fd, &FileDownloader::started,

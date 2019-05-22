@@ -14,10 +14,13 @@ QMAKE_CXXFLAGS += -std=c++17 -O3
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        Book.cpp \
         BookDownloader.cpp \
         DownloadManager.cpp \
         FileDownloader.cpp \
         FileManager.cpp \
+        LibraryManager.cpp \
+        Season.cpp \
         main.cpp
 
 RESOURCES += qml.qrc
@@ -48,9 +51,12 @@ contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
 }
 
 HEADERS += \
+  Author.h \
   Book.h \
   BookDownloader.h \
   DownloadManager.h \
   FileDownloader.h \
   FileManager.h \
-  LibraryInfo.h
+  LibraryInfo.h \
+  LibraryManager.h \
+  Season.h

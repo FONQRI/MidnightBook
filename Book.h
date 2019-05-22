@@ -1,64 +1,56 @@
 #ifndef BOOK_H
 #define BOOK_H
 
+#include <vector>
+
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QString>
 #include <QUrl>
 
-struct Season
+#include "Season.h"
+
+class Book
 {
-	Season(int id, int version, QUrl coverImage, QString name, QString content)
-		: id(id)
-		, version(version)
-		, coverImage(coverImage)
-		, name(name)
-		, content(content)
-	{}
-	Season(QJsonObject obj)
-	{
-		id = obj["id"].toInt();
-		version = obj["version"].toInt();
-		coverImage = obj["coverImage"].toString();
-		name = obj["name"].toString();
-		content = obj["content"].toString();
-	}
-	int id{0};
-	int version{0};
-	QUrl coverImage;
-	QString name;
-	QString content;
-};
+public:
+	Book();
+	void setInfoObject(QJsonObject obj);
+	void setSeasonObject(QJsonObject obj);
 
-struct Book
-{
-	//  Book(BookInfo bookInfo)
-	//	: bookInfo(bookInfo)
-	//  {}
-	Book()
-	{}
-	QString authorId;
-	QString id;
-	int version{0};
-	QString name;
-	QUrl coverImage;
+	QString json() const;
 
-	QList<Season> seasons;
-	void setInfoObject(QJsonObject obj)
-	{
-		id = obj["id"].toString();
-		version = obj["version"].toInt();
-		name = obj["name"].toString();
-		coverImage = obj["coverImage"].toString();
-	}
-	void setSeasonObject(QJsonObject obj)
-	{
+	QString authorId() const;
+	void setAuthorId(const QString &authorId);
 
-		QJsonArray seasonsArray = obj["seasons"].toArray();
-		for (auto const season : seasonsArray) {
-			seasons.append(Season(season.toObject()));
-		}
-	}
+	QString id() const;
+	void setId(const QString &id);
+
+	int version() const;
+	void setVersion(int version);
+
+	QString name() const;
+	void setName(const QString &name);
+
+	//TODO add mdf for checking update
+	QUrl coverImage() const;
+	void setCoverImage(const QUrl &coverImage);
+
+	bool shouldUpdate() const;
+	void setShouldUpdate(bool shouldUpdate);
+
+	const std::vector<Season> &seasons() const;
+	void setSeasons(const std::vector<Season> &seasons);
+
+private:
+	QString m_authorId;
+	QString m_id;
+	int m_version{0};
+	QString m_name;
+	QUrl m_coverImage;
+	bool m_shouldUpdate{true};
+
+	std::vector<Season> m_seasons;
 };
 
 #endif // BOOK_H

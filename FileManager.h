@@ -2,14 +2,25 @@
 #define FILEMANAGER_H
 
 #include "Book.h"
+#include "DownloadManager.h"
 
-class FileManager
+class FileManager : public QObject
 {
-	FileManager();
-
+	Q_OBJECT
 public:
-	static void createAuthorFolders(const QString &authorId);
-	static void saveBook(Book book);
+	FileManager();
+	void createAuthorFolders(const QString &authorId);
+	void saveBook(const Book &book);
+	void updateBook(const Book &book);
+
+signals:
+	void updateUi();
+
+private:
+	void createBookFolders(const Book &book);
+
+private:
+	DownloadManager downloadManager;
 };
 
 #endif // FILEMANAGER_H

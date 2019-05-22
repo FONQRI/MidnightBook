@@ -6,7 +6,10 @@
 #include <QObject>
 #include <QUrl>
 
+#include "Book.h"
+
 class FileDownloader;
+class BookDownloader;
 
 class DownloadManager : public QObject
 {
@@ -16,19 +19,30 @@ public:
 
 	void appendFile(QString path, QUrl url);
 
+	void testDownload();
+	void start();
+
 signals:
 	void downloadStarted(QString fileName);
-	void downloadFinished(QString fileName);
 	void onDownloadProgress(qint64, qint64);
+	void downloadFileFinished(QString fileName);
+	void finished();
+	void seasonsDownloadFinished(Book testBook);
+	void booksFetchFinished(std::vector<Book> bookList);
 
 public slots:
+	std::vector<Book> fetchAuthorBooks(QString id);
+
+private:
+	void downloadFinished(QString fileName);
 
 private:
 	std::map<QUrl, QString> downloadList;
-	void start();
+	void continueDownload();
 	FileDownloader *fileDownloader;
 	std::mutex fileMutex;
 	bool isRunning{false};
+	BookDownloader *bookDownloader;
 };
 
 #endif // DOWNLOADMANAGER_H

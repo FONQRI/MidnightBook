@@ -17,7 +17,7 @@ BookDownloader::BookDownloader(QObject *parent)
 	: QObject(parent)
 {}
 
-void BookDownloader::fetchBooks()
+void BookDownloader::fetchBooks(QString authorId)
 {
 
 	timerBooks.start(30000);
@@ -31,7 +31,7 @@ void BookDownloader::fetchBooks()
 	req.setRawHeader("Accept-Encoding", "gzip, deflate");
 	req.setRawHeader("Content-Type", "application/json");
 	req.setRawHeader("client_key", variables::client_key);
-	req.setRawHeader("username", variables::authorId);
+	req.setRawHeader("username", authorId.toStdString().c_str());
 	req.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
 
 	QJsonObject request_object;
@@ -51,8 +51,10 @@ void BookDownloader::fetchBooks()
 		}
 	});
 
-	QObject::connect(manager, &QNetworkAccessManager::finished, this,
-					 &BookDownloader::requestBooksFinished);
+	QObject::connect(manager, &QNetworkAccessManager::finished,
+					 [this, authorId](QNetworkReply *reply) {
+						 requestBooksFinished(reply, authorId);
+					 });
 }
 
 void BookDownloader::fetchBook(QString id)
@@ -183,8 +185,8 @@ void BookDownloader::requestBookFinished(QNetworkReply *reply)
 	}
 	QByteArray buf = reply->readAll();
 	testBook.setInfoObject(QJsonDocument::fromJson(buf).object()["Response"].toObject());
-	testBook.authorId = authorId();
-	qDebug() << testBook.name;
+	testBook.setAuthorId(authorId());
+	qDebug() << testBook.name();
 }
 
 void BookDownloader::requestSeasonsFinished(QNetworkReply *reply)
@@ -196,6 +198,7 @@ void BookDownloader::requestSeasonsFinished(QNetworkReply *reply)
 	}
 	QByteArray buf = reply->readAll();
 	testBook.setSeasonObject(QJsonDocument::fromJson(buf).object()["Response"].toObject());
+	seasonsDownloadFinished(testBook);
 }
 
 QString BookDownloader::authorId() const
@@ -217,14 +220,25 @@ void BookDownloader::setServerUrl(const QString &serverUrl)
 {
 	m_serverUrl = serverUrl;
 }
-void BookDownloader::requestBooksFinished(QNetworkReply *reply)
+void BookDownloader::requestBooksFinished(QNetworkReply *reply, QString authorId)
 {
 	if (reply->error() != QNetworkReply::NoError) {
 		qDebug() << "Error:" << reply->errorString();
 		return;
 	}
 	QByteArray buf = reply->readAll();
+	//FIXME P[0] save books into bookList
+	auto booksInfo = QJsonDocument::fromJson(buf).object()["Response"].toArray();
 
-	//	qDebug() << "Books : " << buf;
+	std::vector<Book> bookList;
+	for (auto bookInfo : booksInfo) {
+		Book book;
+		book.setInfoObject(bookInfo.toObject());
+		book.setAuthorId(authorId);
+		bookList.push_back(book);
+	}
+
+	emit booksFetchFinished(bookList);
+	qDebug() << "Books : " << buf;
 	//	qDebug() << "____________________";
 }

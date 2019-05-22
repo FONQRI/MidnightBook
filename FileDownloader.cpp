@@ -6,6 +6,7 @@ FileDownloader::FileDownloader(QObject *parent)
 	: QObject(parent)
 {
 	manager = new QNetworkAccessManager;
+	connect(manager, &QNetworkAccessManager::finished, this, &FileDownloader::onFinished);
 }
 
 FileDownloader::~FileDownloader()
@@ -26,15 +27,14 @@ void FileDownloader::downloadFile(QString path, QUrl url)
 	request.setUrl(QUrl(url));
 
 	reply = manager->get(request);
+	connect(reply, &QNetworkReply::downloadProgress, this, &FileDownloader::onDownloadProgress);
+	connect(reply, &QNetworkReply::readyRead, this, &FileDownloader::onReadyRead);
+	connect(reply, &QNetworkReply::finished, this, &FileDownloader::onReplyFinished);
 	emit started(fileInfo.fileName());
 
 	file = new QFile;
 	file->setFileName(saveFilePath);
 	file->open(QIODevice::WriteOnly);
-	connect(reply, &QNetworkReply::downloadProgress, this, &FileDownloader::onDownloadProgress);
-	connect(manager, &QNetworkAccessManager::finished, this, &FileDownloader::onFinished);
-	connect(reply, &QNetworkReply::readyRead, this, &FileDownloader::onReadyRead);
-	connect(reply, &QNetworkReply::finished, this, &FileDownloader::onReplyFinished);
 }
 
 //void FileDownloader::onDownloadProgress(qint64 bytesRead, qint64 bytesTotal)
