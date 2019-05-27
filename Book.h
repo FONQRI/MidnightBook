@@ -32,7 +32,7 @@ public:
 	QString name() const;
 	void setName(const QString &name);
 
-	//TODO add mdf for checking update
+	//TODO add md5 for checking update
 	QUrl coverImage() const;
 	void setCoverImage(const QUrl &coverImage);
 
@@ -42,12 +42,18 @@ public:
 	const std::vector<Season> &seasons() const;
 	void setSeasons(const std::vector<Season> &seasons);
 
+	bool operator<(const Book &book) const;
+
+	QString coverImage_md5() const;
+	void setCoverImage_md5(const QString &coverImage_md5);
+
 private:
 	QString m_authorId;
 	QString m_id;
 	int m_version{0};
 	QString m_name;
 	QUrl m_coverImage;
+	QString m_coverImage_md5;
 	bool m_shouldUpdate{true};
 
 	std::vector<Season> m_seasons;

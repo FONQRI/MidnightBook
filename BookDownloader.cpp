@@ -173,32 +173,38 @@ void BookDownloader::downloadSeasons(QString BookId, std::vector<int> seasonIds)
 		}
 	});
 
-	QObject::connect(manager, &QNetworkAccessManager::finished, this,
-					 &BookDownloader::requestSeasonsFinished);
+	connect(manager, &QNetworkAccessManager::finished,
+			[this, BookId](QNetworkReply *reply) { requestSeasonsFinished(reply, BookId); });
 }
 
 void BookDownloader::requestBookFinished(QNetworkReply *reply)
 {
+	Book tempBook;
+
 	if (reply->error() != QNetworkReply::NoError) {
 		qDebug() << "Error:" << reply->errorString();
 		return;
 	}
 	QByteArray buf = reply->readAll();
-	testBook.setInfoObject(QJsonDocument::fromJson(buf).object()["Response"].toObject());
-	testBook.setAuthorId(authorId());
-	qDebug() << testBook.name();
+	tempBook.setAuthorId(authorId());
+	tempBook.setInfoObject(QJsonDocument::fromJson(buf).object()["Response"].toObject());
+	// FIXME add seasons version vector in book and fill it here to can check season update
+	qDebug() << buf;
 }
 
-void BookDownloader::requestSeasonsFinished(QNetworkReply *reply)
+void BookDownloader::requestSeasonsFinished(QNetworkReply *reply, const QString &bookid)
 {
 
+	Book tempBook;
+	tempBook.setId(bookid);
+	tempBook.setAuthorId(variables::authorId);
 	if (reply->error() != QNetworkReply::NoError) {
 		qDebug() << "Error:" << reply->errorString();
 		return;
 	}
 	QByteArray buf = reply->readAll();
-	testBook.setSeasonObject(QJsonDocument::fromJson(buf).object()["Response"].toObject());
-	seasonsDownloadFinished(testBook);
+	tempBook.setSeasonObject(QJsonDocument::fromJson(buf).object()["Response"].toObject());
+	emit seasonsDownloadFinished(tempBook);
 }
 
 QString BookDownloader::authorId() const
@@ -239,6 +245,5 @@ void BookDownloader::requestBooksFinished(QNetworkReply *reply, QString authorId
 	}
 
 	emit booksFetchFinished(bookList);
-	qDebug() << "Books : " << buf;
 	//	qDebug() << "____________________";
 }

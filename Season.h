@@ -33,11 +33,20 @@ public:
 	QString content() const;
 	void setContent(const QString &content);
 
+	bool operator<(const Season &season)
+	{
+		return this->version() < season.version();
+	}
+
+	QString coverImage_md5() const;
+	void setCoverImage_md5(const QString &coverImage_md5);
+
 private:
 	int m_id{0};
 	int m_version{0};
 	bool m_shouldUpdate{true};
 	QUrl m_coverImage;
+	QString m_coverImage_md5;
 	QString m_name;
 	QString m_content;
 };

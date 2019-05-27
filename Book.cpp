@@ -9,6 +9,7 @@ void Book::setInfoObject(QJsonObject obj)
 	m_version = obj["version"].toInt();
 	m_name = obj["name"].toString();
 	m_coverImage = obj["cover_image"].toString();
+	m_coverImage_md5 = obj["coverImage_md5"].toString();
 }
 
 void Book::setSeasonObject(QJsonObject obj)
@@ -27,6 +28,7 @@ QString Book::json() const
 	obj.insert("version", m_version);
 	obj.insert("name", m_name);
 	obj.insert("cover_image", m_coverImage.url());
+	obj.insert("coverImage_md5", m_coverImage_md5);
 	obj.insert("shouldUpdate", m_shouldUpdate);
 
 	return QJsonDocument(obj).toJson();
@@ -90,6 +92,21 @@ const std::vector<Season> &Book::seasons() const
 void Book::setSeasons(const std::vector<Season> &seasons)
 {
 	m_seasons = seasons;
+}
+
+bool Book::operator<(const Book &book) const
+{
+	return this->version() < book.version();
+}
+
+QString Book::coverImage_md5() const
+{
+	return m_coverImage_md5;
+}
+
+void Book::setCoverImage_md5(const QString &coverImage_md5)
+{
+	m_coverImage_md5 = coverImage_md5;
 }
 
 QString Book::authorId() const

@@ -13,6 +13,7 @@ Season::Season(QJsonObject obj)
 	m_id = obj["id"].toInt();
 	m_version = obj["version"].toInt();
 	m_coverImage = obj["cover_image"].toString();
+	m_coverImage = obj["coverImage_md5"].toString();
 	m_name = obj["name"].toString();
 	m_content = obj["content"].toString();
 }
@@ -24,6 +25,7 @@ QString Season::json() const
 	obj.insert("version", m_version);
 	obj.insert("name", m_name);
 	obj.insert("cover_image", m_coverImage.url());
+	obj.insert("coverImage_md5", m_coverImage_md5);
 	obj.insert("shouldUpdate", m_shouldUpdate);
 	obj.insert("content", m_content);
 
@@ -88,4 +90,14 @@ QString Season::content() const
 void Season::setContent(const QString &content)
 {
 	m_content = content;
+}
+
+QString Season::coverImage_md5() const
+{
+	return m_coverImage_md5;
+}
+
+void Season::setCoverImage_md5(const QString &coverImage_md5)
+{
+	m_coverImage_md5 = coverImage_md5;
 }

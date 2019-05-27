@@ -21,6 +21,9 @@ DownloadManager::DownloadManager(QObject *parent)
 	connect(bookDownloader, &BookDownloader::booksFetchFinished, this,
 			&DownloadManager::booksFetchFinished);
 
+	connect(bookDownloader, &BookDownloader::bookFetchFinished, this,
+			&DownloadManager::bookFetchFinished);
+
 	connect(bookDownloader, &BookDownloader::booksFetchFinished,
 			[](std::vector<Book> bookList) { qDebug() << "Book size " << bookList.size(); });
 }
@@ -40,8 +43,10 @@ void DownloadManager::testDownload()
 	bookDownloader->setServerUrl("http://localhost:8000");
 	bookDownloader->fetchBooks(fonqriAuthor.id);
 
-	bookDownloader->fetchBook("book1.FONQRI.timestamp");
+	//	bookDownloader->fetchBook("book1.FONQRI.timestamp");
 	bookDownloader->downloadSeasons("book1.FONQRI.timestamp", {1, 2});
+	//	bookDownloader->fetchBook("book2.FONQRI.timestamp");
+	bookDownloader->downloadSeasons("book2.FONQRI.timestamp", {1, 2, 3});
 }
 
 std::vector<Book> DownloadManager::fetchAuthorBooks(QString id)
