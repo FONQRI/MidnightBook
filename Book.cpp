@@ -1,5 +1,7 @@
 #include "Book.h"
 
+#include <QDebug>
+
 Book::Book()
 {}
 
@@ -9,7 +11,7 @@ void Book::setInfoObject(QJsonObject obj)
 	m_version = obj["version"].toInt();
 	m_name = obj["name"].toString();
 	m_coverImage = obj["cover_image"].toString();
-	m_coverImage_md5 = obj["coverImage_md5"].toString();
+	m_coverImage_md5 = obj["cover_image_md5"].toString();
 }
 
 void Book::setSeasonObject(QJsonObject obj)
@@ -28,8 +30,8 @@ QString Book::json() const
 	obj.insert("version", m_version);
 	obj.insert("name", m_name);
 	obj.insert("cover_image", m_coverImage.url());
-	obj.insert("coverImage_md5", m_coverImage_md5);
-	obj.insert("shouldUpdate", m_shouldUpdate);
+	obj.insert("cover_image_md5", m_coverImage_md5);
+	obj.insert("shouldUpdate", m_seasonsShouldUpdate);
 
 	return QJsonDocument(obj).toJson();
 }
@@ -74,17 +76,17 @@ void Book::setCoverImage(const QUrl &coverImage)
 	m_coverImage = coverImage;
 }
 
-bool Book::shouldUpdate() const
+bool Book::seasonsShouldUpdate() const
 {
-	return m_shouldUpdate;
+	return m_seasonsShouldUpdate;
 }
 
-void Book::setShouldUpdate(bool shouldUpdate)
+void Book::setSeasonsShouldUpdate(bool shouldUpdate)
 {
-	m_shouldUpdate = shouldUpdate;
+	m_seasonsShouldUpdate = shouldUpdate;
 }
 
-const std::vector<Season> &Book::seasons() const
+std::vector<Season> &Book::seasons()
 {
 	return m_seasons;
 }
@@ -108,6 +110,9 @@ void Book::setCoverImage_md5(const QString &coverImage_md5)
 {
 	m_coverImage_md5 = coverImage_md5;
 }
+
+void Book::write()
+{}
 
 QString Book::authorId() const
 {

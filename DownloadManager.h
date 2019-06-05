@@ -29,9 +29,11 @@ signals:
 	void finished();
 	void seasonsDownloadFinished(Book testBook);
 	void booksFetchFinished(std::vector<Book> bookList);
-	void bookFetchFinished(Book bookList);
+	void bookFetchFinished(Book book);
 
 public slots:
+
+	void downloadSeasons(QString BookId, std::vector<int> seasonIds);
 	std::vector<Book> fetchAuthorBooks(QString id);
 
 private:

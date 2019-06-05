@@ -36,16 +36,18 @@ public:
 	QUrl coverImage() const;
 	void setCoverImage(const QUrl &coverImage);
 
-	bool shouldUpdate() const;
-	void setShouldUpdate(bool shouldUpdate);
+	bool seasonsShouldUpdate() const;
+	void setSeasonsShouldUpdate(bool seasonsShouldUpdate);
 
-	const std::vector<Season> &seasons() const;
+	std::vector<Season> &seasons();
 	void setSeasons(const std::vector<Season> &seasons);
 
 	bool operator<(const Book &book) const;
 
 	QString coverImage_md5() const;
 	void setCoverImage_md5(const QString &coverImage_md5);
+
+	void write();
 
 private:
 	QString m_authorId;
@@ -54,7 +56,7 @@ private:
 	QString m_name;
 	QUrl m_coverImage;
 	QString m_coverImage_md5;
-	bool m_shouldUpdate{true};
+	bool m_seasonsShouldUpdate{true};
 
 	std::vector<Season> m_seasons;
 };

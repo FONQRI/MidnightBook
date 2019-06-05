@@ -19,6 +19,7 @@ void FileDownloader::downloadFile(QString path, QUrl url)
 	QString saveFilePath;
 	QFileInfo fileInfo(url.path());
 
+	qDebug() << __FUNCTION__ << __LINE__ << " " << fileInfo.fileName();
 	QDir dir;
 	dir.mkpath(path);
 	saveFilePath = QString(path + "/" + fileInfo.fileName());
@@ -72,5 +73,5 @@ void FileDownloader::onReplyFinished()
 		file->deleteLater();
 	}
 	QFileInfo fileInfo(file->fileName());
-	emit finished(fileInfo.fileName());
+	emit finished(fileInfo.path() + "/" + fileInfo.fileName());
 }

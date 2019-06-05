@@ -44,7 +44,7 @@ public:
 private:
 	int m_id{0};
 	int m_version{0};
-	bool m_shouldUpdate{true};
+	bool m_shouldUpdate{false};
 	QUrl m_coverImage;
 	QString m_coverImage_md5;
 	QString m_name;

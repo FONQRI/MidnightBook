@@ -8,12 +8,12 @@
 FileManager::FileManager()
 {
 
-	// FIXME delete test
+	//	 FIXME delete test
 	//	QFile test(
 	//		"/home/fonqri/Projects/build/build-MidnightBook-Desktop_Qt_5_12_3_GCC_64bit-Debug/FONQRI/"
-	//		"book2.FONQRI.timestamp/seasons/3/River Crossing Forest Bridge Mist Android Wallpaper.jpg");
+	//		"book1.FONQRI.timestamp/Love Cocktails Black Strawberries Android Wallpaper.jpg");
 	//	if (test.open(QIODevice::ReadOnly)) {
-	//		qDebug() << "MD5 : " << QString(getMd5(test.readAll()));
+	//		qDebug() << "MD5 FIRST : " << QString(getMd5(test.readAll()));
 	//	}
 	//	test.close();
 
@@ -26,6 +26,9 @@ FileManager::FileManager()
 	connect(&downloadManager, &DownloadManager::seasonsDownloadFinished, this,
 			&FileManager::saveOrUpdateBookSeasons);
 
+	connect(&downloadManager, &DownloadManager::downloadFileFinished, this,
+			&FileManager::updatePhotoMd5);
+
 	connect(&downloadManager, &DownloadManager::booksFetchFinished,
 			[this](std::vector<Book> bookList) {
 				for (const auto &book : bookList) {
@@ -34,21 +37,12 @@ FileManager::FileManager()
 			});
 
 	connect(&downloadManager, &DownloadManager::bookFetchFinished, this,
-			&FileManager::saveOrUpdateBook);
+			&FileManager::bookFetchFinished);
 
 	downloadManager.testDownload();
 }
 
-void FileManager::createAuthorFolders(const QString &authorId)
-{
-	QDir dir(QDir::currentPath() + "/" + authorId);
-
-	if (!dir.exists()) {
-		dir.mkpath(QDir::currentPath() + "/" + authorId);
-	}
-}
-
-void FileManager::saveOrUpdateBook(const Book &book)
+void FileManager::saveOrUpdateBook(Book book)
 {
 	//	createBookFolders(book);
 	QDir bookDir(QDir::currentPath() + "/" + book.authorId() + "/" + book.id());
@@ -64,67 +58,73 @@ void FileManager::saveOrUpdateBook(const Book &book)
 			raiseError("Can not create book directory!");
 			return;
 		}
-	} else if (bookNeedsUpdate(book, bookDir)) {
+	} else {
 		updateBook(book, bookDir);
 	}
 }
 
-void FileManager::saveOrUpdateBookSeasons(const Book &book)
+void FileManager::saveOrUpdateBookSeasons(Book book)
 {
-	QDir dir(QDir::currentPath() + "/" + book.authorId() + "/" + book.id());
-	auto tempBook = readBook(dir);
-	if (tempBook.has_value()) {
-		// FIXME check seasons for update and compelete
-		for (const auto &season : book.seasons()) {
-			saveOrUpdateSeason(season, dir);
+	// TODO check seasons version instde of books
+	QDir dir(QDir::currentPath() + "/" + book.authorId() + "/" + book.id() + "/seasons");
+
+	qDebug() << __FUNCTION__ << __LINE__;
+
+	for (auto season : book.seasons()) {
+		QString seasonPath{dir.path() + QString::number(season.id()) + "/season.json"};
+		qDebug() << __FUNCTION__ << __LINE__
+				 << QDir::currentPath() + "/" + book.authorId() + "/" + book.id();
+		QFile seasonFile(seasonPath);
+		if (seasonFile.exists()) {
+			auto oldSeason{readSeason(seasonPath)};
+			if (oldSeason->version() != season.version()) {
+				seasonFile.remove();
+				saveSeason(season, QDir::currentPath() + "/" + book.authorId() + "/" + book.id());
+			}
+		} else {
+			saveSeason(season, QDir::currentPath() + "/" + book.authorId() + "/" + book.id());
 		}
 	}
+
+	downloadManager.start();
 }
 
-void FileManager::saveBook(const Book &book, const QDir &bookDir)
+void FileManager::saveBook(Book book, const QDir &bookDir)
 {
 	QFile bookFile(bookDir.path() + "/book.json");
 	if (bookFile.open(QIODevice::WriteOnly)) {
 		QTextStream out(&bookFile);
 		out << book.json();
+		bookFile.close();
+
 		if (getImageMd5(bookDir.path()) != book.coverImage_md5()) {
 			downloadManager.appendFile(bookDir.path(), book.coverImage());
 		}
 
-		bookFile.close();
 	} else {
 		raiseError(bookFile.errorString());
 	}
 
-	for (const auto &season : book.seasons()) {
-		saveOrUpdateSeason(season, bookDir);
-	}
+	//	for (const auto &season : book.seasons()) {
+	//		saveSeason(season, bookDir.path());
+	//	}
 
 	downloadManager.start();
 }
 
-void FileManager::saveOrUpdateSeason(const Season &season, const QDir &bookDir)
+void FileManager::saveSeason(const Season &season, const QString &bookPath)
 {
-	// chech if season folder exists
-	QString seasonPath = bookDir.path() + "/seasons/" + QString::number(season.id());
-	qDebug() << seasonPath;
+
+	QString seasonPath = bookPath + "/seasons/" + QString::number(season.id());
 	QDir dir(seasonPath);
-	if (!dir.exists()) {
-		dir.mkpath(seasonPath);
-		saveSeason(season, seasonPath);
-	} else {
-		// TODO P[0] update
-		updateSeason(season, seasonPath);
-	}
-	downloadManager.start();
-}
-
-void FileManager::saveSeason(const Season &season, const QString &seasonPath)
-{
+	dir.mkpath(seasonPath);
 
 	QFile seasonFile(seasonPath + "/season.json");
 
+	qDebug() << __FUNCTION__ << __LINE__ << " " << getImageMd5(seasonPath);
+	qDebug() << __FUNCTION__ << __LINE__ << " " << season.coverImage_md5();
 	if (getImageMd5(seasonPath) != season.coverImage_md5()) {
+		removeImageFromDir(seasonPath);
 		downloadManager.appendFile(seasonPath, season.coverImage());
 	}
 
@@ -139,11 +139,36 @@ void FileManager::saveSeason(const Season &season, const QString &seasonPath)
 	}
 }
 
-void FileManager::updateSeason(const Season &season, const QDir &seasonPath)
-{}
+void FileManager::updateSeason(const Season &season, const QString &bookPath)
+{
+
+	QFile seasonFile(bookPath + "/seasons/" + QString::number(season.id()) + "/season.json");
+
+	if (seasonFile.open(QIODevice::WriteOnly)) {
+		seasonFile.remove();
+		seasonFile.close();
+		saveSeason(season, bookPath);
+
+	} else {
+
+		raiseError(seasonFile.errorString());
+	}
+}
 
 void FileManager::checkSeasonsUpdate(const Book &book, const QString &bookPath)
 {}
+
+void FileManager::bookFetchFinished(Book book)
+{
+	saveOrUpdateBook(book);
+	std::vector<int> seasons;
+	for (auto season : book.seasons()) {
+		seasons.push_back(season.id());
+	}
+	qDebug() << __FUNCTION__ << __LINE__ << seasons;
+	qDebug() << __FUNCTION__ << __LINE__ << book.id();
+	downloadManager.downloadSeasons(book.id(), seasons);
+}
 
 bool FileManager::bookNeedsUpdate(const Book &book, const QDir &bookDir)
 {
@@ -155,18 +180,27 @@ bool FileManager::bookNeedsUpdate(const Book &book, const QDir &bookDir)
 	return true;
 }
 
-void FileManager::updateBook(const Book &book, const QDir &bookDir)
+void FileManager::updateBook(Book book, const QDir &bookDir)
 {
-	// TODO implement update book and add md5 for images
-	// check if image needs update
-	QString bookPath = bookDir.path() + "/book.json";
-	std::optional<Book> oldBook = readBook(bookPath);
 
-	QFile oldBookFile(bookPath);
-	if (oldBookFile.open(QIODevice::WriteOnly) && !oldBookFile.remove()) {
-		saveBook(book, bookDir);
+	std::optional<Book> oldBook = readBook(bookDir);
+	if (oldBook.has_value()) {
+		if (oldBook->version() == book.version()) {
+			if (getImageMd5(bookDir.path()) != book.coverImage_md5()) {
+				removeImageFromDir(bookDir.path());
+				book.setCoverImage_md5(oldBook->coverImage_md5());
+				downloadManager.appendFile(bookDir.path(), book.coverImage());
+			}
+		}
+		QFile oldBookFile(bookDir.path() + "/book.json");
+		if (oldBookFile.open(QIODevice::WriteOnly) && oldBookFile.remove()) {
+			saveBook(book, bookDir);
+		} else {
+			raiseError(oldBookFile.errorString());
+		}
+		return;
 	} else {
-		raiseError(oldBookFile.errorString());
+		saveBook(book, bookDir);
 	}
 }
 
@@ -180,17 +214,57 @@ void FileManager::createBookFolders(const Book &book)
 	}
 }
 
-std::optional<Book> FileManager::readBook(const QDir &bookDir)
+std::optional<Book> FileManager::readBook(const QString &bookPath)
 {
 	std::optional<Book> book;
-	QFile bookFile(bookDir.path() + "/book.json");
+	QFile bookFile(bookPath + "/book.json");
 	if (bookFile.open(QIODevice::ReadOnly)) {
 		book = Book();
 		book->setInfoObject(QJsonDocument::fromJson(bookFile.readAll()).object());
+
+		//		QFileInfo fileInfo(bookPath);
+		QDir seasonsDir(bookPath + "/seasons");
+		//		bookDir.setFilter(QDir::Dirs);
+		if (seasonsDir.exists()) {
+			auto dirList = seasonsDir.entryInfoList(QDir::Dirs);
+			//TODO use readSeason
+			QJsonArray seasonsArray;
+			for (auto info : dirList) {
+				QFile seasonFile(info.filePath() + "/season.json");
+				if (seasonFile.open(QIODevice::ReadOnly)) {
+					seasonsArray.append(QJsonDocument::fromJson(seasonFile.readAll()).object());
+				}
+			}
+			if (!seasonsArray.isEmpty()) {
+				QJsonObject seasonsObj{{"seasons", seasonsArray}};
+				book->setSeasonObject(seasonsObj);
+			}
+		}
 	} else {
 		raiseError(bookFile.errorString());
 	}
 	return book;
+}
+
+std::optional<Book> FileManager::readBook(const QDir &bookDir)
+{
+	return readBook(bookDir.path());
+}
+
+std::optional<Season> FileManager::readSeason(const QDir &seasonDir)
+{
+	return readSeason(seasonDir.path() + "/season.json");
+}
+
+std::optional<Season> FileManager::readSeason(const QString &seasonPath)
+{
+	std::optional<Season> season;
+
+	QFile seasonFile(seasonPath);
+	if (seasonFile.open(QIODevice::ReadOnly)) {
+		season = Season(QJsonDocument::fromJson(seasonFile.readAll()).object());
+	}
+	return season;
 }
 
 QByteArray FileManager::getMd5(const QByteArray &data)
@@ -204,30 +278,83 @@ QString FileManager::getImageMd5(QString path)
 	QStringList filters;
 	filters << "*.png"
 			<< "*.jpg"
+			<< "*.jpeg"
 			<< "*.bmp";
 	QFileInfoList fileInfoList = dir.entryInfoList(filters, QDir::Files | QDir::NoDotAndDotDot);
 	if (!fileInfoList.isEmpty()) {
 		fileInfoList.first().fileName();
-		QFile image(fileInfoList.first().fileName());
+		qDebug() << "PATH " << fileInfoList.first().filePath();
+		qDebug() << "NAME " << fileInfoList.first().fileName();
+		QFile image(fileInfoList.first().filePath());
 		image.open(QIODevice::ReadOnly);
 		return getMd5(image.readAll());
 	}
 	return "";
 }
 
-bool FileManager::removeImageMd5(QString path)
+bool FileManager::removeImageFromDir(QString path)
 {
+	qDebug() << __FUNCTION__ << __LINE__;
 	QDir dir(path);
 	QStringList filters;
 	filters << "*.png"
 			<< "*.jpg"
+			<< "*.jpeg"
 			<< "*.bmp";
 	QFileInfoList fileInfoList = dir.entryInfoList(filters, QDir::Files | QDir::NoDotAndDotDot);
+
+	qDebug() << __FUNCTION__ << __LINE__ << "size " << fileInfoList.size();
 	if (!fileInfoList.isEmpty()) {
-		fileInfoList.first().fileName();
-		QFile image(fileInfoList.first().fileName());
-		image.open(QIODevice::WriteOnly);
-		return image.remove();
+		bool temp = false;
+		for (auto info : fileInfoList) {
+			qDebug() << __FUNCTION__ << __LINE__ << info.filePath();
+			QFile image(info.filePath());
+			//		image.open(QIODevice::WriteOnly);
+			bool temp = image.remove();
+			qDebug() << __FUNCTION__ << __LINE__ << temp;
+			qDebug() << __FUNCTION__ << __LINE__ << image.errorString();
+		}
+
+		return temp;
 	}
 	return false;
+}
+
+void FileManager::updatePhotoMd5(const QString &filename)
+{
+	qDebug() << __FUNCTION__ << __LINE__ << " " << filename;
+	QFileInfo fileInfo(filename);
+	QStringList pathSpilit = filename.split("/");
+
+	qDebug() << __FUNCTION__ << __LINE__ << " " << pathSpilit.at(pathSpilit.size() - 2);
+	QRegExp re("\\d*"); // a digit (\d), zero or more times (*)
+	if (re.exactMatch(pathSpilit.at(pathSpilit.size() - 2))) {
+		qDebug() << __FUNCTION__ << __LINE__ << " in season ";
+		int seasonId = pathSpilit.at(pathSpilit.size() - 2).toInt();
+		qDebug() << __FUNCTION__ << __LINE__ << " in season ";
+		//		pathSpilit.erase(pathSpilit.end());
+		qDebug() << __FUNCTION__ << __LINE__ << " in season ";
+		QDir seasonsDir(fileInfo.path());
+		qDebug() << __FUNCTION__ << __LINE__ << seasonsDir.path();
+		seasonsDir.cd("../..");
+		qDebug() << __FUNCTION__ << __LINE__ << seasonsDir.path();
+		QString bookPath = seasonsDir.path();
+
+		qDebug() << __FUNCTION__ << __LINE__ << bookPath;
+		auto book = readBook(bookPath);
+		qDebug() << __FUNCTION__ << __LINE__ << book->seasons().size();
+		qDebug() << __FUNCTION__ << __LINE__ << "seasonId " << seasonId;
+		auto season = book->seasons()[static_cast<size_t>(seasonId - 1)];
+		qDebug() << __FUNCTION__ << __LINE__ << " " << seasonId;
+		season.setCoverImage_md5(getImageMd5(fileInfo.path()));
+		season.setShouldUpdate(false);
+		qDebug() << __FUNCTION__ << __LINE__ << " " << book->seasons().size();
+		updateSeason(season, bookPath);
+	} else {
+		auto book = readBook(fileInfo.path());
+
+		qDebug() << fileInfo.path();
+		book->setCoverImage_md5(getImageMd5(fileInfo.path()));
+		updateBook(book.value(), fileInfo.path());
+	}
 }

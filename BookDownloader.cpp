@@ -12,6 +12,7 @@
 #include <QNetworkReply>
 
 #include "LibraryInfo.h"
+#include <numeric>
 
 BookDownloader::BookDownloader(QObject *parent)
 	: QObject(parent)
@@ -19,7 +20,6 @@ BookDownloader::BookDownloader(QObject *parent)
 
 void BookDownloader::fetchBooks(QString authorId)
 {
-
 	timerBooks.start(30000);
 
 	QNetworkAccessManager *manager = new QNetworkAccessManager();
@@ -187,8 +187,17 @@ void BookDownloader::requestBookFinished(QNetworkReply *reply)
 	}
 	QByteArray buf = reply->readAll();
 	tempBook.setAuthorId(authorId());
-	tempBook.setInfoObject(QJsonDocument::fromJson(buf).object()["Response"].toObject());
+	// TODO get seasons json
+	auto bookObject = QJsonDocument::fromJson(buf).object()["Response"].toObject();
+
+	tempBook.setInfoObject(bookObject);
+
+	//	auto seaonsObject = bookObject["seasons"].toObject();
+	tempBook.setSeasonObject(bookObject);
 	// FIXME add seasons version vector in book and fill it here to can check season update
+	//	auto  seasonsArray = seaonsObject["seasons"].toArray();
+
+	emit bookFetchFinished(tempBook);
 	qDebug() << buf;
 }
 
@@ -203,6 +212,8 @@ void BookDownloader::requestSeasonsFinished(QNetworkReply *reply, const QString 
 		return;
 	}
 	QByteArray buf = reply->readAll();
+	qDebug() << __FUNCTION__ << __LINE__ << " " << buf;
+
 	tempBook.setSeasonObject(QJsonDocument::fromJson(buf).object()["Response"].toObject());
 	emit seasonsDownloadFinished(tempBook);
 }
@@ -233,13 +244,13 @@ void BookDownloader::requestBooksFinished(QNetworkReply *reply, QString authorId
 		return;
 	}
 	QByteArray buf = reply->readAll();
-	//FIXME P[0] save books into bookList
 	auto booksInfo = QJsonDocument::fromJson(buf).object()["Response"].toArray();
 
 	std::vector<Book> bookList;
 	for (auto bookInfo : booksInfo) {
 		Book book;
 		book.setInfoObject(bookInfo.toObject());
+		qDebug() << __FUNCTION__ << " MD5 :" << book.coverImage_md5();
 		book.setAuthorId(authorId);
 		bookList.push_back(book);
 	}
