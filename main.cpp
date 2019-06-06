@@ -10,6 +10,7 @@
 int main(int argc, char *argv[])
 {
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	QCoreApplication::setApplicationName("Midnight Book");
 
 	QGuiApplication app(argc, argv);
 

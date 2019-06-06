@@ -44,7 +44,10 @@ DISTFILES += \
   android/gradlew \
   android/gradlew.bat \
   android/res/values/libs.xml \
-  qtquickcontrols2.conf
+  qtquickcontrols2.conf \
+  resources/icon/midnight_128.png \
+  resources/icon/midnight_256.png \
+  resources/icon/midnight_512.png
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
   ANDROID_PACKAGE_SOURCE_DIR = \

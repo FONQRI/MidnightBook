@@ -5,14 +5,15 @@ import QtGraphicalEffects 1.12
 
 Window {
     visible: true
-
+    property bool isPhone: Qt.platform.os == "android"
+                           || Qt.platform.os == "ios"
     //    width: Screen.width
     //    height: Screen.height
-    width: 480
-    height: 720
-    title: qsTr("Hello World")
-    Component.onCompleted: exitPopup.open()
+    width: isPhone ? Screen.width : 480
+    height: isPhone ? Screen.height : 720
+    title: qsTr("Midnight Book")
 
+    //Component.onCompleted: exitPopup.open()
     LinearGradient {
         anchors.fill: parent
         end: Qt.point(parent.width * 0.266, 0)
@@ -73,4 +74,5 @@ Window {
             }
         }
     }
+    Component.onCompleted: console.log(Qt.platform.os)
 }
