@@ -3,9 +3,10 @@
 #include <QFile>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 
-#include "FileManager.h"
-#include "LibraryManager.h"
+#include "src/cpp/models/LibraryManager.h"
+#include "src/cpp/storage/FileManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,12 +15,9 @@ int main(int argc, char *argv[])
 
 	QGuiApplication app(argc, argv);
 
-	FileManager fm;
-	LibraryManager bookManager(fm);
-
 	QQmlApplicationEngine engine;
 
-	const QUrl url(QStringLiteral("qrc:/main.qml"));
+	const QUrl url(QStringLiteral("qrc:/src/qml/main.qml"));
 	QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app,
 					 [url](QObject *obj, const QUrl &objUrl) {
 						 if (!obj && url == objUrl)
@@ -27,6 +25,7 @@ int main(int argc, char *argv[])
 					 },
 					 Qt::QueuedConnection);
 
+	qmlRegisterType<LibraryManager>("fonqri.book.models", 1, 0, "BooksModel");
 	engine.load(url);
 
 	//	FileDownloader fd;

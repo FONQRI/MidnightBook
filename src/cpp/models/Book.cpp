@@ -1,4 +1,4 @@
-#include "Book.h"
+#include "src/cpp/models/Book.h"
 
 #include <QDebug>
 
@@ -19,7 +19,7 @@ void Book::setSeasonObject(QJsonObject obj)
 
 	QJsonArray seasonsArray = obj["seasons"].toArray();
 	for (auto const season : seasonsArray) {
-		m_seasons.push_back(Season(season.toObject()));
+		m_seasons.push_back(new Season(season.toObject()));
 	}
 }
 
@@ -86,12 +86,12 @@ void Book::setSeasonsShouldUpdate(bool shouldUpdate)
 	m_seasonsShouldUpdate = shouldUpdate;
 }
 
-std::vector<Season> &Book::seasons()
+const QList<Season *> &Book::seasons() const
 {
 	return m_seasons;
 }
 
-void Book::setSeasons(const std::vector<Season> &seasons)
+void Book::setSeasons(const QList<Season *> seasons)
 {
 	m_seasons = seasons;
 }

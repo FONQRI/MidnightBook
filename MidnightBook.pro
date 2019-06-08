@@ -14,14 +14,14 @@ QMAKE_CXXFLAGS += -std=c++17 -O3
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        Book.cpp \
-        BookDownloader.cpp \
-        DownloadManager.cpp \
-        FileDownloader.cpp \
-        FileManager.cpp \
-        LibraryManager.cpp \
-        Season.cpp \
-        main.cpp
+        main.cpp \
+        src/cpp/models/Book.cpp \
+        src/cpp/models/LibraryManager.cpp \
+        src/cpp/models/Season.cpp \
+        src/cpp/network/BookDownloader.cpp \
+        src/cpp/network/DownloadManager.cpp \
+        src/cpp/network/FileDownloader.cpp \
+        src/cpp/storage/FileManager.cpp
 
 RESOURCES += qml.qrc
 
@@ -54,13 +54,14 @@ contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
     $$PWD/android
 }
 
-HEADERS += \
-  Author.h \
-  Book.h \
-  BookDownloader.h \
-  DownloadManager.h \
-  FileDownloader.h \
-  FileManager.h \
-  LibraryInfo.h \
-  LibraryManager.h \
-  Season.h
+HEADERS += \ \
+  src/cpp/models/Author.h \
+  src/cpp/models/Book.h \
+  src/cpp/models/LibraryInfo.h \
+  src/cpp/models/LibraryManager.h \
+  src/cpp/models/Season.h \
+  src/cpp/network/BookDownloader.h \
+  src/cpp/network/DownloadManager.h \
+  src/cpp/network/FileDownloader.h \
+  src/cpp/storage/FileManager.h
+

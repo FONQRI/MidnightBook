@@ -1,8 +1,8 @@
-#include "DownloadManager.h"
+#include "src/cpp/network/DownloadManager.h"
 
-#include "Author.h"
-#include "BookDownloader.h"
-#include "FileDownloader.h"
+#include "src/cpp/models/Author.h"
+#include "src/cpp/network/BookDownloader.h"
+#include "src/cpp/network/FileDownloader.h"
 
 DownloadManager::DownloadManager(QObject *parent)
 	: QObject(parent)

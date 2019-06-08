@@ -4,14 +4,17 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QObject>
 #include <QString>
 #include <QUrl>
 
-class Season
+class Season : public QObject
 {
+	Q_OBJECT
 public:
 	Season(int id, int version, QUrl coverImage, QString name, QString content);
 	Season(QJsonObject obj);
+	Season(const Season &season);
 
 	QString json() const;
 
@@ -44,11 +47,11 @@ public:
 private:
 	int m_id{0};
 	int m_version{0};
-	bool m_shouldUpdate{false};
 	QUrl m_coverImage;
 	QString m_coverImage_md5;
 	QString m_name;
 	QString m_content;
+	bool m_shouldUpdate{false};
 };
 
 #endif // SEASON_H

@@ -20,6 +20,17 @@ Season::Season(QJsonObject obj)
 	m_content = obj["content"].toString();
 }
 
+Season::Season(const Season &season)
+{
+	this->m_id = season.id();
+	this->m_name = season.name();
+	this->m_content = season.content();
+	this->m_version = season.version();
+	this->m_coverImage = season.coverImage();
+	this->m_coverImage_md5 = season.coverImage_md5();
+	this->m_shouldUpdate = season.shouldUpdate();
+}
+
 QString Season::json() const
 {
 	QJsonObject obj;

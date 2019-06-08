@@ -1,4 +1,4 @@
-#include "FileDownloader.h"
+#include "src/cpp/network/FileDownloader.h"
 
 #include <QDir>
 

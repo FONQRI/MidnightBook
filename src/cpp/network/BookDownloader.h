@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QTimer>
 
-#include "Book.h"
+#include "src/cpp/models/Book.h"
 
 class QNetworkReply;
 

@@ -39,8 +39,8 @@ public:
 	bool seasonsShouldUpdate() const;
 	void setSeasonsShouldUpdate(bool seasonsShouldUpdate);
 
-	std::vector<Season> &seasons();
-	void setSeasons(const std::vector<Season> &seasons);
+	const QList<Season *> &seasons() const;
+	void setSeasons(const QList<Season *> seasons);
 
 	bool operator<(const Book &book) const;
 
@@ -58,7 +58,7 @@ private:
 	QString m_coverImage_md5;
 	bool m_seasonsShouldUpdate{true};
 
-	std::vector<Season> m_seasons;
+	QList<Season *> m_seasons;
 };
 
 #endif // BOOK_H

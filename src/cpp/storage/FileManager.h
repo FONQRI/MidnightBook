@@ -5,8 +5,8 @@
 
 #include <QDir>
 
-#include "Book.h"
-#include "DownloadManager.h"
+#include "src/cpp/models/Book.h"
+#include "src/cpp/network/DownloadManager.h"
 
 class FileManager : public QObject
 {
@@ -23,6 +23,7 @@ public:
 	void bookFetchFinished(Book book);
 
 	bool bookNeedsUpdate(const Book &book, const QDir &bookDir);
+	std::vector<Book> readBooks(const QString &authorId);
 signals:
 	void updateUi();
 	void raiseError(const QString &errorString);
@@ -31,8 +32,8 @@ private:
 	void createBookFolders(const Book &book);
 	std::optional<Book> readBook(const QString &bookPath);
 	std::optional<Book> readBook(const QDir &bookDir);
-	std::optional<Season> readSeason(const QDir &seasonDir);
-	std::optional<Season> readSeason(const QString &seasonPath);
+	std::optional<Season *> readSeason(const QDir &seasonDir);
+	std::optional<Season *> readSeason(const QString &seasonPath);
 	QByteArray getMd5(const QByteArray &data);
 	QString getImageMd5(QString path);
 	bool removeImageFromDir(QString path);

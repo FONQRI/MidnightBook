@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QUrl>
 
-#include "Book.h"
+#include "src/cpp/models/Book.h"
 
 class FileDownloader;
 class BookDownloader;

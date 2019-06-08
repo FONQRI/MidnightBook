@@ -1,4 +1,4 @@
-#include "BookDownloader.h"
+#include "src/cpp/network/BookDownloader.h"
 
 #include <iostream>
 
@@ -11,7 +11,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#include "LibraryInfo.h"
+#include "src/cpp/models/LibraryInfo.h"
 #include <numeric>
 
 BookDownloader::BookDownloader(QObject *parent)
@@ -198,7 +198,6 @@ void BookDownloader::requestBookFinished(QNetworkReply *reply)
 	//	auto  seasonsArray = seaonsObject["seasons"].toArray();
 
 	emit bookFetchFinished(tempBook);
-	qDebug() << buf;
 }
 
 void BookDownloader::requestSeasonsFinished(QNetworkReply *reply, const QString &bookid)
@@ -212,7 +211,6 @@ void BookDownloader::requestSeasonsFinished(QNetworkReply *reply, const QString 
 		return;
 	}
 	QByteArray buf = reply->readAll();
-	qDebug() << __FUNCTION__ << __LINE__ << " " << buf;
 
 	tempBook.setSeasonObject(QJsonDocument::fromJson(buf).object()["Response"].toObject());
 	emit seasonsDownloadFinished(tempBook);
