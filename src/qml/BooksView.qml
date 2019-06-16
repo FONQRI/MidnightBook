@@ -15,10 +15,6 @@ Item {
                 color: "#191970"
             }
 
-            //            GradientStop {
-            //                position: 0.2
-            //                color: "#8D0B93"
-            //            }
             GradientStop {
                 position: 0
                 color: "#800080"
@@ -34,22 +30,13 @@ Item {
             width: parent.width
             height: 500
 
-            background: Rectangle {
-                color: "red"
+            Image {
+                source: coverImageUrl
             }
 
-            ListView {
-                model: seasons
-                anchors.fill: parent
-                delegate: Label {
-                    background: Rectangle {
-                        color: "blue"
-                    }
-                    text: name
-                    width: parent.width
-                    height: 20
-                }
-            }
+            //            SeasonsMainView {
+            //                model: seasons
+            //            }
         }
     }
 

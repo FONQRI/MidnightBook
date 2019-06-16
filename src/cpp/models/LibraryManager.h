@@ -18,7 +18,15 @@ class LibraryManager : public QAbstractListModel
 public:
 	explicit LibraryManager(QObject *parent = nullptr);
 
-	enum BookRoles { Id = Qt::UserRole + 1, Version, Name, CoverImage, Seasons };
+	enum BookRoles {
+		Id = Qt::UserRole + 1,
+		Version,
+		Name,
+		CoverImageUrl,
+		CoverImagePath,
+		Seasons,
+		Summary
+	};
 
 	void appendAuthor(Author author);
 	void fetchAuthorBooks(QString id);

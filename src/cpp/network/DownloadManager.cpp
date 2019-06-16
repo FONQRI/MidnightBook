@@ -39,6 +39,7 @@ void DownloadManager::appendFile(QString path, QUrl url)
 
 void DownloadManager::testDownload()
 {
+	qDebug() << "test download is going to work";
 	Author fonqriAuthor;
 	fonqriAuthor.id = "FONQRI";
 	fonqriAuthor.name = "بهنام صباغی";
@@ -47,7 +48,7 @@ void DownloadManager::testDownload()
 	bookDownloader->fetchBooks(fonqriAuthor.id);
 
 	bookDownloader->fetchBook("book1.FONQRI.timestamp");
-	bookDownloader->fetchBook("book2.FONQRI.timestamp");
+	//bookDownloader->fetchBook("book2.FONQRI.timestamp");
 }
 
 void DownloadManager::downloadSeasons(QString BookId, std::vector<int> seasonIds)

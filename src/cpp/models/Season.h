@@ -11,8 +11,9 @@
 class Season : public QObject
 {
 	Q_OBJECT
+	Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
 public:
-	Season(int id, int version, QUrl coverImage, QString name, QString content);
+	//	Season(int id, int version, QUrl coverImage, QString name, QString content);
 	Season(QJsonObject obj);
 	Season(const Season &season);
 
@@ -27,8 +28,8 @@ public:
 	bool shouldUpdate() const;
 	void setShouldUpdate(bool shouldUpdate);
 
-	QUrl coverImage() const;
-	void setCoverImage(const QUrl &coverImage);
+	QUrl coverImageUrl() const;
+	void setCoverImageUrl(const QUrl &coverImageUrl);
 
 	QString name() const;
 	void setName(const QString &name);
@@ -44,12 +45,23 @@ public:
 	QString coverImage_md5() const;
 	void setCoverImage_md5(const QString &coverImage_md5);
 
+	QString summary() const;
+	void setSummary(const QString &summary);
+
+	QString coverImagePath() const;
+	void setCoverImagePath(const QString &coverImagePath);
+
+signals:
+	void nameChanged(QString name);
+
 private:
 	int m_id{0};
 	int m_version{0};
-	QUrl m_coverImage;
+	QString m_coverImagePath;
+	QUrl m_coverImageUrl;
 	QString m_coverImage_md5;
-	QString m_name;
+	QString m_name{"un inited"};
+	QString m_summary;
 	QString m_content;
 	bool m_shouldUpdate{false};
 };

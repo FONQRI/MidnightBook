@@ -189,7 +189,7 @@ void BookDownloader::requestBookFinished(QNetworkReply *reply)
 	tempBook.setAuthorId(authorId());
 	// TODO get seasons json
 	auto bookObject = QJsonDocument::fromJson(buf).object()["Response"].toObject();
-
+	qDebug() << "FONQRI" << buf;
 	tempBook.setInfoObject(bookObject);
 
 	//	auto seaonsObject = bookObject["seasons"].toObject();

@@ -33,8 +33,8 @@ public:
 	void setName(const QString &name);
 
 	//TODO add md5 for checking update
-	QUrl coverImage() const;
-	void setCoverImage(const QUrl &coverImage);
+	QUrl coverImageUrl() const;
+	void setCoverImageUrl(const QUrl &coverImageUrl);
 
 	bool seasonsShouldUpdate() const;
 	void setSeasonsShouldUpdate(bool seasonsShouldUpdate);
@@ -49,13 +49,21 @@ public:
 
 	void write();
 
+	QString summary() const;
+	void setSummary(const QString &summary);
+
+	QString CoverImagePath() const;
+	void setCoverImagePath(const QString &CoverImagePath);
+
 private:
 	QString m_authorId;
 	QString m_id;
 	int m_version{0};
 	QString m_name;
-	QUrl m_coverImage;
+	QUrl m_coverImageUrl;
+	QString m_CoverImagePath;
 	QString m_coverImage_md5;
+	QString m_summary;
 	bool m_seasonsShouldUpdate{true};
 
 	QList<Season *> m_seasons;

@@ -45,8 +45,9 @@ FileManager::FileManager()
 void FileManager::saveOrUpdateBook(Book book)
 {
 	//	createBookFolders(book);
+	qDebug() << "Book id" << book.id();
 	QDir bookDir(QDir::currentPath() + "/" + book.authorId() + "/" + book.id());
-	QFile bookFile(QDir::currentPath() + "/" + book.authorId() + "/" + book.id() + "/book.json");
+	QFile bookFile(bookDir.path() + "/book.json");
 
 	// save book
 	if (!bookFile.exists()) {
@@ -92,8 +93,9 @@ void FileManager::saveBook(Book book, const QDir &bookDir)
 		out << book.json();
 		bookFile.close();
 
-		if (getImageMd5(bookDir.path()) != book.coverImage_md5()) {
-			downloadManager.appendFile(bookDir.path(), book.coverImage());
+		if (getImageMd5(bookDir.path()) != book.coverImage_md5()
+			&& !book.coverImageUrl().isEmpty()) {
+			downloadManager.appendFile(bookDir.path(), book.coverImageUrl());
 		}
 
 	} else {
@@ -116,9 +118,9 @@ void FileManager::saveSeason(const Season &season, const QString &bookPath)
 
 	QFile seasonFile(seasonPath + "/season.json");
 
-	if (getImageMd5(seasonPath) != season.coverImage_md5()) {
+	if (getImageMd5(seasonPath) != season.coverImage_md5() && !season.coverImageUrl().isEmpty()) {
 		removeImageFromDir(seasonPath);
-		downloadManager.appendFile(seasonPath, season.coverImage());
+		downloadManager.appendFile(seasonPath, season.coverImageUrl());
 	}
 
 	if (seasonFile.open(QIODevice::WriteOnly)) {
@@ -192,6 +194,7 @@ std::vector<Book> FileManager::readBooks(const QString &authorId)
 		}
 	}
 	qDebug() << "books size at read" << books.size();
+
 	return books;
 }
 
@@ -199,14 +202,21 @@ void FileManager::updateBook(Book book, const QDir &bookDir)
 {
 
 	std::optional<Book> oldBook = readBook(bookDir);
+	qDebug() << __FUNCTION__ << "FONQRI " << oldBook->CoverImagePath() + "/book.json";
+	qDebug() << __FUNCTION__ << "FONQRI " << oldBook->coverImageUrl().path() + "/book.json";
+
 	if (oldBook.has_value()) {
 		if (oldBook->version() == book.version()) {
-			if (getImageMd5(bookDir.path()) != book.coverImage_md5()) {
+			if (getImageMd5(bookDir.path()) != book.coverImage_md5()
+				&& !book.coverImageUrl().isEmpty()) {
 				removeImageFromDir(bookDir.path());
 				book.setCoverImage_md5(oldBook->coverImage_md5());
-				downloadManager.appendFile(bookDir.path(), book.coverImage());
+				downloadManager.appendFile(bookDir.path(), book.coverImageUrl());
 			}
+
+			return;
 		}
+		qDebug() << __FUNCTION__ << "FONQRI " << bookDir.path() + "/book.json";
 		QFile oldBookFile(bookDir.path() + "/book.json");
 		if (oldBookFile.open(QIODevice::WriteOnly) && oldBookFile.remove()) {
 			saveBook(book, bookDir);
@@ -236,6 +246,10 @@ std::optional<Book> FileManager::readBook(const QString &bookPath)
 	if (bookFile.open(QIODevice::ReadOnly)) {
 		book = Book();
 		book->setInfoObject(QJsonDocument::fromJson(bookFile.readAll()).object());
+
+		qDebug() << "in read";
+		qDebug() << book->coverImageUrl();
+		qDebug() << book->CoverImagePath();
 
 		//		QFileInfo fileInfo(bookPath);
 		QDir seasonsDir(bookPath + "/seasons");
@@ -335,6 +349,9 @@ void FileManager::updatePhotoMd5(const QString &filename)
 	QFileInfo fileInfo(filename);
 	QStringList pathSpilit = filename.split("/");
 
+	qDebug() << __FUNCTION__ << "FONQRI " << __LINE__ << fileInfo.filePath();
+	qDebug() << "FONQRI " << __LINE__ << fileInfo.fileName();
+
 	QRegExp re("\\d*"); // a digit (\d), zero or more times (*)
 	if (re.exactMatch(pathSpilit.at(pathSpilit.size() - 2))) {
 		int seasonId = pathSpilit.at(pathSpilit.size() - 2).toInt();
@@ -344,11 +361,14 @@ void FileManager::updatePhotoMd5(const QString &filename)
 		auto book = readBook(bookPath);
 		auto season = book->seasons()[seasonId - 1];
 		season->setCoverImage_md5(getImageMd5(fileInfo.path()));
+		season->setCoverImagePath(fileInfo.filePath());
 		season->setShouldUpdate(false);
 		updateSeason(*season, bookPath);
 	} else {
 		auto book = readBook(fileInfo.path());
 		book->setCoverImage_md5(getImageMd5(fileInfo.path()));
+		book->setCoverImagePath(fileInfo.filePath());
+		qDebug() << "[FONQRI] " << fileInfo.filePath();
 		updateBook(book.value(), fileInfo.path());
 	}
 }

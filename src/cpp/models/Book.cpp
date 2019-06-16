@@ -10,8 +10,10 @@ void Book::setInfoObject(QJsonObject obj)
 	m_id = obj["id"].toString();
 	m_version = obj["version"].toInt();
 	m_name = obj["name"].toString();
-	m_coverImage = obj["cover_image"].toString();
+	m_coverImageUrl = obj["cover_image_url"].toString();
+	m_CoverImagePath = obj["cover_image_path"].toString();
 	m_coverImage_md5 = obj["cover_image_md5"].toString();
+	m_summary = obj["summary"].toString();
 }
 
 void Book::setSeasonObject(QJsonObject obj)
@@ -29,8 +31,10 @@ QString Book::json() const
 	obj.insert("id", m_id);
 	obj.insert("version", m_version);
 	obj.insert("name", m_name);
-	obj.insert("cover_image", m_coverImage.url());
+	obj.insert("cover_image_url", m_coverImageUrl.url());
+	obj.insert("cover_image_path", m_CoverImagePath);
 	obj.insert("cover_image_md5", m_coverImage_md5);
+	obj.insert("summary", m_summary);
 	obj.insert("shouldUpdate", m_seasonsShouldUpdate);
 
 	return QJsonDocument(obj).toJson();
@@ -66,14 +70,14 @@ void Book::setName(const QString &name)
 	m_name = name;
 }
 
-QUrl Book::coverImage() const
+QUrl Book::coverImageUrl() const
 {
-	return m_coverImage;
+	return m_coverImageUrl;
 }
 
-void Book::setCoverImage(const QUrl &coverImage)
+void Book::setCoverImageUrl(const QUrl &coverImage)
 {
-	m_coverImage = coverImage;
+	m_coverImageUrl = coverImage;
 }
 
 bool Book::seasonsShouldUpdate() const
@@ -113,6 +117,26 @@ void Book::setCoverImage_md5(const QString &coverImage_md5)
 
 void Book::write()
 {}
+
+QString Book::summary() const
+{
+	return m_summary;
+}
+
+void Book::setSummary(const QString &summary)
+{
+	m_summary = summary;
+}
+
+QString Book::CoverImagePath() const
+{
+	return m_CoverImagePath;
+}
+
+void Book::setCoverImagePath(const QString &CoverImagePath)
+{
+	m_CoverImagePath = CoverImagePath;
+}
 
 QString Book::authorId() const
 {

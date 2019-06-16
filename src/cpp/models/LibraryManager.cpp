@@ -46,10 +46,19 @@ QVariant LibraryManager::data(const QModelIndex &index, int role) const
 		return item.version();
 	}
 	if (role == BookRoles::Name) {
+		qDebug() << "{FONQRI}:" << item.name();
 		return item.name();
 	}
-	if (role == BookRoles::CoverImage) {
-		return item.coverImage();
+	if (role == BookRoles::CoverImageUrl) {
+		qDebug() << "{FONQRI}:" << item.coverImageUrl();
+		return item.coverImageUrl();
+	}
+	if (role == BookRoles::CoverImagePath) {
+		qDebug() << "{FONQRI}:" << item.CoverImagePath();
+		return item.CoverImagePath();
+	}
+	if (role == BookRoles::Summary) {
+		return item.summary();
 	}
 	if (role == BookRoles::Seasons) {
 		QList<QObject *> list;
@@ -65,12 +74,14 @@ QVariant LibraryManager::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> LibraryManager::roleNames() const
 {
 	QHash<int, QByteArray> roles;
-	enum BookRoles { Id = Qt::UserRole + 1, Version, Name, CoverImage, Seasons };
+	//	enum BookRoles { Id = Qt::UserRole + 1, Version, Name, CoverImage, Seasons, Summary	 };
 
 	roles[Id] = "id";
 	roles[Version] = "version";
 	roles[Name] = "name";
-	roles[CoverImage] = "coverImage";
+	roles[CoverImageUrl] = "coverImageUrl";
+	roles[CoverImagePath] = "CoverImagePath";
 	roles[Seasons] = "seasons";
+	roles[Summary] = "summary";
 	return roles;
 }
