@@ -68,12 +68,11 @@ void FileManager::saveOrUpdateBookSeasons(Book book)
 	QDir dir(QDir::currentPath() + "/" + book.authorId() + "/" + book.id() + "/seasons");
 
 	for (auto season : book.seasons()) {
-		QString seasonPath{dir.path() + QString::number(season->id()) + "/season.json"};
-
+		QString seasonPath{dir.path() + "/" + QString::number(season->id()) + "/season.json"};
 		QFile seasonFile(seasonPath);
 		if (seasonFile.exists()) {
 			auto oldSeason{readSeason(seasonPath)};
-			if (oldSeason.value()->version() != season->version()) {
+			if (oldSeason.value().version() != season->version()) {
 				seasonFile.remove();
 				saveSeason(*season, QDir::currentPath() + "/" + book.authorId() + "/" + book.id());
 			}
@@ -134,20 +133,44 @@ void FileManager::saveSeason(const Season &season, const QString &bookPath)
 	}
 }
 
-void FileManager::updateSeason(const Season &season, const QString &bookPath)
+void FileManager::updateSeason(Season season, const QString &bookPath)
 {
 
 	QFile seasonFile(bookPath + "/seasons/" + QString::number(season.id()) + "/season.json");
+	QDir seasonDir(bookPath + "/seasons/" + QString::number(season.id()));
+	auto oldSeason = readSeason(seasonDir);
 
-	if (seasonFile.open(QIODevice::WriteOnly)) {
-		seasonFile.remove();
-		seasonFile.close();
-		saveSeason(season, bookPath);
+	if (oldSeason.has_value()) {
+		if (oldSeason->version() == season.version()) {
+			if (getImageMd5(seasonDir.path()) != season.coverImage_md5()
+				&& !season.coverImageUrl().isEmpty()) {
+				removeImageFromDir(seasonDir.path());
+				season.setCoverImage_md5(oldSeason->coverImage_md5());
+				downloadManager.appendFile(seasonDir.path(), season.coverImageUrl());
+			}
+		}
+		if (QFile(oldSeason->coverImagePath()).exists()) {
+			season.setCoverImagePath(oldSeason->coverImagePath());
+		}
 
+		if (seasonFile.open(QIODevice::WriteOnly) && seasonFile.remove()) {
+			saveSeason(season, bookPath);
+		} else {
+			raiseError(seasonFile.errorString());
+		}
+		return;
 	} else {
-
-		raiseError(seasonFile.errorString());
+		saveSeason(season, bookPath);
 	}
+
+	//	if (seasonFile.open(QIODevice::WriteOnly)) {
+	//		seasonFile.remove();
+	//		seasonFile.close();
+
+	//	} else {
+
+	//		raiseError(seasonFile.errorString());
+	//	}
 }
 
 void FileManager::checkSeasonsUpdate(const Book &book, const QString &bookPath)
@@ -203,7 +226,7 @@ void FileManager::updateBook(Book book, const QDir &bookDir)
 
 	std::optional<Book> oldBook = readBook(bookDir);
 	qDebug() << __FUNCTION__ << "FONQRI " << oldBook->CoverImagePath() + "/book.json";
-	qDebug() << __FUNCTION__ << "FONQRI " << oldBook->coverImageUrl().path() + "/book.json";
+	qDebug() << __FUNCTION__ << "FONQRI " << oldBook->coverImageUrl().path();
 
 	if (oldBook.has_value()) {
 		if (oldBook->version() == book.version()) {
@@ -213,10 +236,11 @@ void FileManager::updateBook(Book book, const QDir &bookDir)
 				book.setCoverImage_md5(oldBook->coverImage_md5());
 				downloadManager.appendFile(bookDir.path(), book.coverImageUrl());
 			}
-
-			return;
 		}
-		qDebug() << __FUNCTION__ << "FONQRI " << bookDir.path() + "/book.json";
+		if (QFile(oldBook->CoverImagePath()).exists()) {
+			book.setCoverImagePath(oldBook->CoverImagePath());
+		}
+		qDebug() << __FUNCTION__ << "FONQRI " << book.CoverImagePath();
 		QFile oldBookFile(bookDir.path() + "/book.json");
 		if (oldBookFile.open(QIODevice::WriteOnly) && oldBookFile.remove()) {
 			saveBook(book, bookDir);
@@ -280,20 +304,21 @@ std::optional<Book> FileManager::readBook(const QDir &bookDir)
 	return readBook(bookDir.path());
 }
 
-std::optional<Season *> FileManager::readSeason(const QDir &seasonDir)
+std::optional<Season> FileManager::readSeason(const QDir &seasonDir)
 {
 	return readSeason(seasonDir.path() + "/season.json");
 }
 
-std::optional<Season *> FileManager::readSeason(const QString &seasonPath)
+std::optional<Season> FileManager::readSeason(const QString &seasonPath)
 {
-	std::optional<Season *> season;
+	std::optional<Season> season;
 
 	QFile seasonFile(seasonPath);
 	if (seasonFile.open(QIODevice::ReadOnly)) {
-		season = new Season(QJsonDocument::fromJson(seasonFile.readAll()).object());
+
+		return Season(QJsonDocument::fromJson(seasonFile.readAll()).object());
 	}
-	return season;
+	return {};
 }
 
 QByteArray FileManager::getMd5(const QByteArray &data)

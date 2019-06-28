@@ -48,7 +48,7 @@ void DownloadManager::testDownload()
 	bookDownloader->fetchBooks(fonqriAuthor.id);
 
 	bookDownloader->fetchBook("book1.FONQRI.timestamp");
-	//bookDownloader->fetchBook("book2.FONQRI.timestamp");
+	bookDownloader->fetchBook("book2.FONQRI.timestamp");
 }
 
 void DownloadManager::downloadSeasons(QString BookId, std::vector<int> seasonIds)

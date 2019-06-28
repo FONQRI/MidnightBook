@@ -46,14 +46,16 @@ QVariant LibraryManager::data(const QModelIndex &index, int role) const
 		return item.version();
 	}
 	if (role == BookRoles::Name) {
-		qDebug() << "{FONQRI}:" << item.name();
+		qDebug() << __FUNCTION__ << __LINE__;
 		return item.name();
 	}
 	if (role == BookRoles::CoverImageUrl) {
+		qDebug() << __FUNCTION__ << __LINE__;
 		qDebug() << "{FONQRI}:" << item.coverImageUrl();
 		return item.coverImageUrl();
 	}
 	if (role == BookRoles::CoverImagePath) {
+		qDebug() << __FUNCTION__ << __LINE__;
 		qDebug() << "{FONQRI}:" << item.CoverImagePath();
 		return item.CoverImagePath();
 	}

@@ -22,16 +22,18 @@ Item {
         }
     }
     ListView {
+        anchors.fill: parent
         model: BooksModel {
         }
-        anchors.fill: parent
         delegate: Label {
             //            text: name
             width: parent.width
             height: 500
 
             Image {
-                source: coverImageUrl
+                anchors.fill: parent
+                source: Qt.resolvedUrl("file:///" + CoverImagePath)
+                sourceSize: Qt.size(parent.width, parent.height)
             }
 
             //            SeasonsMainView {
