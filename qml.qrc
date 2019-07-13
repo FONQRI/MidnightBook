@@ -3,5 +3,7 @@
         <file>src/qml/main.qml</file>
         <file>src/qml/BooksView.qml</file>
         <file>src/qml/SeasonsMainView.qml</file>
+        <file>src/qml/BookDelegate.qml</file>
+        <file>src/qml/BookPreview.qml</file>
     </qresource>
 </RCC>

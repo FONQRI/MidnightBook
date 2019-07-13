@@ -82,7 +82,7 @@ QHash<int, QByteArray> LibraryManager::roleNames() const
 	roles[Version] = "version";
 	roles[Name] = "name";
 	roles[CoverImageUrl] = "coverImageUrl";
-	roles[CoverImagePath] = "CoverImagePath";
+	roles[CoverImagePath] = "coverImagePath";
 	roles[Seasons] = "seasons";
 	roles[Summary] = "summary";
 	return roles;
